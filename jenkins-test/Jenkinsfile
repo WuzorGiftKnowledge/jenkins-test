@@ -1,0 +1,46 @@
+pipeline {
+    agent { 
+        node {
+            label 'docker-agent-python'
+            }
+      }
+    triggers {
+        pollSCM '* * * * *'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                echo "Building.."
+                sh '''
+		cd jenkins-test
+		cd myapp
+		apt-get -y install python3.11-venv
+		python3 -m venv myenv
+		. myenv/bin/activate
+                pip3 -V
+                pip3 install -r requirements.txt
+                '''
+            }
+        }
+        stage('Test') {
+            steps {
+                echo "Testing.."
+                sh '''
+		cd jenkins-test
+                cd myapp
+		. myenv/bin/activate
+                python3 hello.py
+                python3 hello.py --name=Brad
+                '''
+            }
+        }
+        stage('Deliver') {
+            steps {
+                echo 'Deliver....'
+                sh '''
+                echo "doing delivery stuff.."
+                '''
+            }
+        }
+    }
+}
